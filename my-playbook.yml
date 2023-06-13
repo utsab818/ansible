@@ -1,0 +1,14 @@
+---
+- name: Install and start nginx
+  hosts: ec2
+  
+  tasks:
+  - name: Install nginx
+    apt:
+      name: nginx # nginx=version
+      state: latest # present
+
+  - name: Start nginx
+    service:
+      name: nginx
+      state: started
