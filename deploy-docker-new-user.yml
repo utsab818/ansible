@@ -1,0 +1,83 @@
+---
+- name: Install python 3,docker and docker-compose
+  hosts: docker_server
+  become: yes
+  become_user: root
+  gather_facts: False
+  tasks:
+  - name: Make sure python3 and docker are installed
+    vars:
+      ansible_python_interpreter: /usr/bin/python
+    yum:
+      name:
+      - python3
+      - docker
+      update_cache: yes
+      state: present
+  - name: Ensure docker-compose is present in the server
+    get_url: 
+      url: https://github.com/docker/compose/releases/download/1.27.4/docker-compose-Linux-{{lookup('pipe', 'uname -m')}}
+      dest: /usr/local/bin/docker-compose
+      mode: +x
+
+
+- name: Start docker
+  hosts: docker_server
+  become: yes
+  tasks:
+  - name: Ensure docker is running
+    systemd:
+      name: docker
+      state: started
+  - name: Install docker python module
+    pip:
+      name:
+      - docker
+      - docker-compose
+
+
+- name: Create new linux user
+  hosts: docker_server
+  become: yes
+  tasks:
+  - name: Create new linux user
+    user:
+      name: dockerUser
+      groups: adm,docker
+  
+
+
+# - name: Test docker pull
+#   hosts: docker_server
+#   tasks:
+#   - name: Pull redis
+#     docker_image:
+#       name: redis 
+#       source: pull
+
+- name: Start docker containers
+  hosts: docker_server
+  become: yes
+  become_user: dockerUser
+  vars_prompt:
+  - name: docker_password
+    prompt: Enter password for docker registry
+  # Can also use files containing variables
+  # var_files:
+  #   variable file name
+  tasks:
+  - name: Copy docker-compose file
+    copy:
+      src: /Users/utsab/dockerProject/docker-compose-full.yaml
+      dest: /home/ec2-user/docker-compose.yaml
+  - name: Docker login
+    docker_login:
+      registry_url: https://index.docker.io/v1/
+      username: utsab12312
+      password: "{{docker_password}}"
+  - name: Start container from compose
+    docker_compose:
+      project_src: /home/ec2-user
+      # state: present # docker-compose up # default state so no need to specify
+
+  
