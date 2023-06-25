@@ -12,6 +12,7 @@
       api_version: v1
       kind: Namespace
       state: present
+      # export the K8S_AUTH_KUBECONFIG in local terminal for making the kubeconfig path default
       kubeconfig: ~/Demo-projects/terraform/kubeconfig_myapp-eks-cluster
   - name: Deploy nginx app
     k8s:
