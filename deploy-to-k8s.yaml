@@ -1,0 +1,22 @@
+---
+# Install in local where this ansible in present
+  #- pip install openshift
+  #- pip install yaml
+  
+- name: Deploy app in new namespace
+  hosts: localhost
+  tasks:
+  - name: Create new k8s namespace
+    k8s:
+      name: my-app
+      api_version: v1
+      kind: Namespace
+      state: present
+      kubeconfig: ~/Demo-projects/terraform/kubeconfig_myapp-eks-cluster
+  - name: Deploy nginx app
+    k8s:
+      src: ~/Demo-projects/Simple-k8s-Files/nginx-config.yaml
+      state: present
+      kubeconfig: ~/Demo-projects/terraform/kubeconfig_myapp-eks-cluster
+      namespace: my-app
+
