@@ -1,2 +1,5 @@
 # hosts file
 hosts
+
+# variable files
+project-vars
